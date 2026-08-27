@@ -4,9 +4,11 @@
    so you never need brackets around USE statements again).
    ============================================================ */
 
-
 CREATE DATABASE SupplyChainRisk;
+GO
 
 USE SupplyChainRisk;
+GO
 
-SELECT DB_NAME() AS CurrentDatabase;  
+SELECT DB_NAME() AS CurrentDatabase;   -- should print: SupplyChainRisk
+GO
