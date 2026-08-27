@@ -105,4 +105,3 @@ SELECT TOP 5 * FROM dbo.vw_Shipments_Master;
 SELECT * FROM dbo.vw_Route_Summary ORDER BY Disruption_Rate_Pct DESC;
 SELECT * FROM dbo.vw_Monthly_Trend ORDER BY Ship_Year, Ship_Month;
 SELECT * FROM dbo.vw_Category_Summary ORDER BY Disruption_Rate_Pct DESC;
-GO
