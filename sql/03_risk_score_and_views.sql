@@ -1,19 +1,14 @@
 /* ============================================================
    STEP 3 — RISK EXPOSURE SCORE + REPORTING VIEWS
-   Run this ENTIRE script at once (Ctrl+A, then F5).
-   Do not highlight partial sections — the CTE and the
-   query that uses it must run together in one batch.
    ============================================================ */
 
 USE SupplyChainRisk;
-GO
 
--- 3.1 Build a scored table with a composite Risk Exposure Score (0-10)
+-- 3.1 I am gonna build a scored table with a composite Risk Exposure Score (0-10)
 --     50% Geopolitical_Risk_Score (already 0-10)
 --     30% normalized Fuel_Price_Index
 --     20% normalized Distance_km
 IF OBJECT_ID('dbo.Shipments_Scored', 'U') IS NOT NULL DROP TABLE dbo.Shipments_Scored;
-GO
 
 ;WITH Bounds AS (
     SELECT
@@ -31,10 +26,8 @@ SELECT
 INTO dbo.Shipments_Scored
 FROM dbo.Shipments s
 CROSS JOIN Bounds b;
-GO
 
 ALTER TABLE dbo.Shipments_Scored ADD Risk_Tier VARCHAR(10);
-GO
 
 UPDATE dbo.Shipments_Scored
 SET Risk_Tier = CASE
@@ -42,7 +35,6 @@ SET Risk_Tier = CASE
     WHEN Risk_Exposure_Score >= 4 THEN 'Medium'
     ELSE 'Low'
 END;
-GO
 
 -- Verify
 SELECT COUNT(*) AS TotalRows FROM dbo.Shipments_Scored;   -- expect 5000
@@ -53,7 +45,7 @@ SELECT Risk_Tier, COUNT(*) AS Shipments,
 FROM dbo.Shipments_Scored
 GROUP BY Risk_Tier
 ORDER BY Avg_Score DESC;
-GO
+
 
 /* ============================================================
    3.2 REPORTING VIEWS — what Power BI will connect to
@@ -72,7 +64,6 @@ SELECT
     Geopolitical_Risk_Score, Carrier_Reliability_Score, Lead_Time_Days,
     Disruption_Occurred, Risk_Exposure_Score, Risk_Tier
 FROM dbo.Shipments_Scored;
-GO
 
 CREATE OR ALTER VIEW dbo.vw_Route_Summary AS
 SELECT
@@ -86,7 +77,6 @@ SELECT
     ROUND(AVG(Lead_Time_Days),1)                    AS Avg_Lead_Time
 FROM dbo.Shipments_Scored
 GROUP BY Origin_Port, Destination_Port;
-GO
 
 CREATE OR ALTER VIEW dbo.vw_Monthly_Trend AS
 SELECT
@@ -99,7 +89,6 @@ SELECT
     ROUND(AVG(Fuel_Price_Index),2)                   AS Avg_Fuel_Index
 FROM dbo.Shipments_Scored
 GROUP BY YEAR(Ship_Date), MONTH(Ship_Date), FORMAT(Ship_Date,'yyyy-MM');
-GO
 
 CREATE OR ALTER VIEW dbo.vw_Category_Summary AS
 SELECT
@@ -110,7 +99,6 @@ SELECT
     ROUND(SUM(Weight_MT),0)                          AS Total_Weight_MT
 FROM dbo.Shipments_Scored
 GROUP BY Product_Category;
-GO
 
 -- Verify all views
 SELECT TOP 5 * FROM dbo.vw_Shipments_Master;
