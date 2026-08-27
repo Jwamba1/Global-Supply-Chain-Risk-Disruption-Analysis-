@@ -3,9 +3,8 @@
    ============================================================ */
 
 USE SupplyChainRisk;
-GO
 
--- 2.1 Overall snapshot
+-- 2.1 Overall snapshout
 SELECT
     COUNT(*)                                          AS Total_Shipments,
     MIN(Ship_Date)                                    AS First_Date,
@@ -96,4 +95,3 @@ SELECT
     ROUND(AVG(Distance_km),0)      AS Avg_Distance_km
 FROM dbo.Shipments
 GROUP BY Disruption_Occurred;
-GO
