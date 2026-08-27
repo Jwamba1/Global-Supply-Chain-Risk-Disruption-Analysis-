@@ -5,10 +5,8 @@
    ============================================================ */
 
 USE SupplyChainRisk;
-GO
 
 IF OBJECT_ID('dbo.Shipments', 'U') IS NOT NULL DROP TABLE dbo.Shipments;
-GO
 
 CREATE TABLE dbo.Shipments (
     Shipment_ID                 VARCHAR(15)     NOT NULL PRIMARY KEY,
@@ -26,12 +24,7 @@ CREATE TABLE dbo.Shipments (
     Lead_Time_Days               DECIMAL(6,2)    NOT NULL,
     Disruption_Occurred          BIT             NOT NULL
 );
-GO
 
--- IMPORTANT: double-check the exact filename in your Downloads folder.
--- Windows may have renamed it (e.g. "global_supply_chain_risk_2026 (3).csv")
--- if you downloaded it more than once. Adjust the filename below to match
--- exactly what File Explorer shows.
 BULK INSERT dbo.Shipments
 FROM 'C:\Users\WambaJose\Downloads\global_supply_chain_risk_2026 (3).csv'
 WITH (
@@ -41,15 +34,11 @@ WITH (
     CODEPAGE = '65001',
     TABLOCK
 );
-GO
 
--- Verify: must return 5000
 SELECT COUNT(*) AS TotalRows FROM dbo.Shipments;
-GO
 
--- Peek at the data
+
 SELECT TOP 10 * FROM dbo.Shipments;
-GO
 
 -- Data quality checks
 SELECT
@@ -66,4 +55,4 @@ SELECT Shipment_ID, COUNT(*) AS c FROM dbo.Shipments GROUP BY Shipment_ID HAVING
 SELECT DISTINCT Transport_Mode FROM dbo.Shipments;
 SELECT DISTINCT Product_Category FROM dbo.Shipments;
 SELECT DISTINCT Weather_Condition FROM dbo.Shipments;
-GO
+
