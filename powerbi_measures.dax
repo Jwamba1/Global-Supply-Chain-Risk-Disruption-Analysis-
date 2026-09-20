@@ -1,0 +1,73 @@
+// =====================================================================
+// DAX MEASURES — Global Supply Chain Risk Dashboard
+// Table name: Shipments   (rename the imported CSV table to "Shipments")
+// Create each one with: select _Measures table > Modeling > New measure
+// Paste ONE measure at a time (everything from the name to the blank line)
+// =====================================================================
+
+// ---------- Core volume & disruption ----------
+Total Shipments = COUNTROWS ( Shipments )
+
+Disrupted Shipments =
+CALCULATE ( [Total Shipments], Shipments[Disruption_Occurred] = 1 )
+
+Disruption Rate =
+DIVIDE ( [Disrupted Shipments], [Total Shipments] )
+// Format: Percentage, 1 decimal
+
+Disruption Rate vs Average =
+[Disruption Rate] - CALCULATE ( [Disruption Rate], ALL ( Shipments ) )
+// Format: Percentage, 1 decimal. Positive = riskier than the overall 61.3%
+
+Disruption Rate PY =
+CALCULATE ( [Disruption Rate], SAMEPERIODLASTYEAR ( 'Date'[Date] ) )
+// Format: Percentage, 1 decimal
+
+// ---------- Risk metrics ----------
+Avg Risk Exposure Score = AVERAGE ( Shipments[Risk_Exposure_Score] )
+// Format: Decimal, 1 decimal
+
+Avg Geopolitical Risk = AVERAGE ( Shipments[Geopolitical_Risk_Score] )
+// Format: Decimal, 1 decimal
+
+Avg Carrier Reliability = AVERAGE ( Shipments[Carrier_Reliability_Score] )
+// Format: Percentage, 1 decimal
+
+Avg Lead Time (Days) = AVERAGE ( Shipments[Lead_Time_Days] )
+// Format: Decimal, 1 decimal
+
+Severe Weather Shipments =
+CALCULATE (
+    [Total Shipments],
+    Shipments[Weather_Condition] IN { "Hurricane", "Storm" }
+)
+
+// ---------- Predictive model ----------
+Avg Predicted Probability = AVERAGE ( Shipments[Disruption_Probability] )
+// Format: Percentage, 1 decimal
+
+High Risk Shipments =
+CALCULATE ( [Total Shipments], Shipments[Predicted_Risk_Band] = "High" )
+
+High Risk Share =
+DIVIDE ( [High Risk Shipments], [Total Shipments] )
+// Format: Percentage, 1 decimal
+
+Model Hit Rate (High Band) =
+CALCULATE ( [Disruption Rate], Shipments[Predicted_Risk_Band] = "High" )
+// Format: Percentage, 1 decimal. Share of "High" flags that were truly disrupted (~92.9%)
+
+// =====================================================================
+// DATE TABLE — Modeling > New table (NOT New measure)
+// Then: Table tools > Mark as date table > Date
+// Then: select Month column > Column tools > Sort by column > MonthNum
+// =====================================================================
+Date =
+ADDCOLUMNS (
+    CALENDAR ( DATE ( 2024, 1, 1 ), DATE ( 2025, 12, 31 ) ),
+    "Year", YEAR ( [Date] ),
+    "MonthNum", MONTH ( [Date] ),
+    "Month", FORMAT ( [Date], "MMM" ),
+    "YearMonth", FORMAT ( [Date], "YYYY-MM" ),
+    "Quarter", "Q" & QUARTER ( [Date] )
+)
